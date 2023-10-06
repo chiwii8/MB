@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -31,8 +32,8 @@ public class LeerFichero {
      * @throws java.io.IOException
      * @throws java.io.FileNotFoundException
      */
-    public ArrayList<Fichero> leerCorpus(String path) throws Exception,IOException,FileNotFoundException{   ///TO_DO testear el método con el corpus
-        ArrayList<Fichero> Datos = new ArrayList<>();
+    public List<Fichero> readCorpus(String path) throws Exception,IOException,FileNotFoundException{   ///TO_DO testear el método con el corpus
+        List<Fichero> Datos = new ArrayList<>();
         File file = new File(path);
         int count = 1;
         if(!file.exists()){
@@ -86,8 +87,6 @@ public class LeerFichero {
             Datos.add(newFichero);
         }
         
-        
-        
         return Datos;
     }
 
@@ -95,7 +94,7 @@ public class LeerFichero {
      *
      * @param path Realizar para la versión 0.2
      */
-    public void leerConsultas(String path) {
+    public void readConsultas(String path) {
 
     }
 }

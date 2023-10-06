@@ -5,6 +5,8 @@
 package LecturaFicheros;
 
 import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  *
@@ -14,7 +16,7 @@ import java.util.ArrayList;
 public class Fichero {
     private String id;
     private String title;
-    private ArrayList<String> Authors;
+    private List<String> Authors;
     private String Text;
 
     public Fichero(){
@@ -42,11 +44,11 @@ public class Fichero {
         this.title = title;
     }
 
-    public ArrayList<String> getAuthors() {
+    public List<String> getAuthors() {
         return Authors;
     }
 
-    public void setAuthors(ArrayList<String> Authors) {
+    public void setAuthors(List<String> Authors) {
         this.Authors = Authors;
     }
     
@@ -60,14 +62,5 @@ public class Fichero {
 
     public void setText(String Text) {
         this.Text = Text;
-    }
-
-    
-    
-    
-    
-    @Override
-    public String toString(){
-        return "";
-    }
+    }   
 }

@@ -2,7 +2,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package miCliente;
+package App;
+import LecturaFicheros.DocumentToXML;
 import java.io.IOException;
 import java.util.UUID;
 import org.apache.solr.client.solrj.SolrClient;
@@ -24,5 +25,7 @@ public class miClienteSoljr {
         final UpdateResponse updateResponse = client.add("micoleccion", doc);
         // Indexed documents must be committed
         client.commit("micoleccion");
+
+        
         }    
 }
