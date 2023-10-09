@@ -6,6 +6,7 @@ package LecturaFicheros;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.dom4j.Element;
 
 
 /**
@@ -13,16 +14,16 @@ import java.util.List;
  * @author alejandro
  */
 
-public class Fichero {
+public class DocumentFile {
     private String id;
     private String title;
     private List<String> Authors;
     private String Text;
 
-    public Fichero(){
+    public DocumentFile(){
         Authors = new ArrayList<>();
     }
-    public Fichero(String id, ArrayList<String> Authors, String Text){
+    public DocumentFile(String id, ArrayList<String> Authors, String Text){
         this.id = id;
         this.Authors = Authors;
         this.Text = Text;
@@ -63,4 +64,17 @@ public class Fichero {
     public void setText(String Text) {
         this.Text = Text;
     }   
+    
+    public Element getElement(Element root){
+        Element newElement = root.addElement(DocumentFile.class.toString())
+                .addAttribute("id", id)
+                .addAttribute("title", title);
+   
+        for(String author: Authors)
+            newElement.addAttribute("author", author);
+   
+        newElement.addText(Text);
+        
+        return newElement;
+    }
 }

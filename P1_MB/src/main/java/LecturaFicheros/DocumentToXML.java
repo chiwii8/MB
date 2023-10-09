@@ -11,30 +11,45 @@ import java.util.List;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
-
 /**
  *
  * @author alejandro
  */
 public class DocumentToXML {
 
-    public Document createDocument(String rootName) throws IOException {
-        Document doc = DocumentHelper.createDocument();
-        Element root = doc.addElement(rootName);
+    private static String rootName = "corpus";
 
-        return doc;
+    public static String getRootName() {
+        return rootName;
     }
 
-    public Document parseCorpusDocument(List<Node> Components) {
-        return null;
+    public static void setRootName(String rootName) {
+        DocumentToXML.rootName = rootName;
+    }
+
+    public Document parseCorpusDocument(List<DocumentFile> Components,String path) {
+         Document doc = DocumentHelper.createDocument();
+        try {
+            
+            Element root = doc.addElement("corpus");
+            
+            for (DocumentFile newDocFile : Components) {
+                newDocFile.getElement(root);
+            }
+            
+            writeoutDocument(path, doc);
+        } catch (Exception e) {
+            System.out.println("Se ha producido un error al parsear el documento");
+            doc = null;
+        }
+        
+        
+        return doc;
     }
 
     public void writeoutDocument(String path, Document doc) {
         File file = new File(path);
-
-        try {
+        try{
             if (!file.exists()) {
                 System.out.println("El documento no existe así que se generará");
                 if(file.createNewFile())
@@ -46,7 +61,6 @@ public class DocumentToXML {
             FileWriter out = new FileWriter(file);
             doc.write(out);
         } catch (IOException e) {
-
             System.out.println("Se ha producido un error a la hora de crear el XML");
         }catch(Exception e){
             System.out.println(e.getMessage());

@@ -32,8 +32,8 @@ public class LeerFichero {
      * @throws java.io.IOException
      * @throws java.io.FileNotFoundException
      */
-    public List<Fichero> readCorpus(String path) throws Exception,IOException,FileNotFoundException{   ///TO_DO testear el método con el corpus
-        List<Fichero> Datos = new ArrayList<>();
+    public List<DocumentFile> readCorpus(String path) throws Exception,IOException,FileNotFoundException{   ///TO_DO testear el método con el corpus
+        List<DocumentFile> Data = new ArrayList<>();
         File file = new File(path);
         int count = 1;
         if(!file.exists()){
@@ -45,7 +45,7 @@ public class LeerFichero {
         String textLine = bf.readLine();
         
         while(textLine != null){
-            Fichero newFichero = new Fichero();
+            DocumentFile newFichero = new DocumentFile();
           
             if(textLine.matches(idRegex)){
                 String id = textLine.replaceFirst(idRegex, "");
@@ -84,10 +84,10 @@ public class LeerFichero {
             
             
             count++;
-            Datos.add(newFichero);
+            Data.add(newFichero);
         }
         
-        return Datos;
+        return Data;
     }
 
     /**
