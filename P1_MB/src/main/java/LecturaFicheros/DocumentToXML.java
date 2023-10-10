@@ -27,19 +27,23 @@ public class DocumentToXML {
         DocumentToXML.rootName = rootName;
     }
 
-    public Document parseCorpusDocument(List<DocumentFile> Components,String path) {
+    public static Document parseCorpusDocument(List<DocumentFile> Components,String path) {
          Document doc = DocumentHelper.createDocument();
         try {
             
             Element root = doc.addElement("corpus");
             
             for (DocumentFile newDocFile : Components) {
-                newDocFile.getElement(root);
+                Element newElement= newDocFile.getElement(root);
+                System.out.println(newElement.toString());
+                
             }
+            
             
             writeoutDocument(path, doc);
         } catch (Exception e) {
             System.out.println("Se ha producido un error al parsear el documento");
+            System.out.println(e.getMessage());
             doc = null;
         }
         
@@ -47,7 +51,7 @@ public class DocumentToXML {
         return doc;
     }
 
-    public void writeoutDocument(String path, Document doc) {
+    private static void writeoutDocument(String path, Document doc) {
         File file = new File(path);
         try{
             if (!file.exists()) {

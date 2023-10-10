@@ -17,18 +17,22 @@ import org.dom4j.Element;
 public class DocumentFile {
     private String id;
     private String title;
-    private List<String> Authors;
-    private String Text;
+    private List<String> authors;
+    private String text;
 
     public DocumentFile(){
-        Authors = new ArrayList<>();
+        authors = new ArrayList<>();
     }
     public DocumentFile(String id, ArrayList<String> Authors, String Text){
         this.id = id;
-        this.Authors = Authors;
-        this.Text = Text;
+        this.authors = Authors;
+        this.text = Text;
     }
 
+    public static String getNameClass(){
+        return "DocumentFile";
+    }
+    
     public String getId() {
         return id;
     }
@@ -46,35 +50,58 @@ public class DocumentFile {
     }
 
     public List<String> getAuthors() {
-        return Authors;
+        return authors;
     }
 
     public void setAuthors(List<String> Authors) {
-        this.Authors = Authors;
+        this.authors = Authors;
     }
     
     public void setnewAuthor(String Author){
-        Authors.add(Author);
+        authors.add(Author);
     }
 
     public String getText() {
-        return Text;
+        return text;
     }
 
     public void setText(String Text) {
-        this.Text = Text;
+        this.text = Text;
     }   
     
     public Element getElement(Element root){
-        Element newElement = root.addElement(DocumentFile.class.toString())
-                .addAttribute("id", id)
-                .addAttribute("title", title);
-   
-        for(String author: Authors)
-            newElement.addAttribute("author", author);
-   
-        newElement.addText(Text);
+        
+        Element newElement = root.addElement("DocumentFile");
+        Element elId = newElement.addElement("identificador").addText(id);
+        Element elTitle = newElement.addElement("title").addText(title);
+        authors.stream().map(author->newElement.addElement("author").addText(author));
+        Element elText = newElement.addElement("text").addText(text);
         
         return newElement;
+        /*Element newElement;
+            newElement.
+                root.addElement("DocumentFile")
+                .addElement("identificador")
+                .addAttribute("identificador", id)
+                .addAttribute("titulo", title);
+   
+        for(String author: Authors)
+            newElement.addAttribute("autor", author);
+   
+        newElement.addAttribute("texto",Text);
+        
+        return newElement;*/        /*Element newElement;
+            newElement.
+                root.addElement("DocumentFile")
+                .addElement("identificador")
+                .addAttribute("identificador", id)
+                .addAttribute("titulo", title);
+   
+        for(String author: Authors)
+            newElement.addAttribute("autor", author);
+   
+        newElement.addAttribute("texto",Text);
+        
+        return newElement;*/
     }
 }
