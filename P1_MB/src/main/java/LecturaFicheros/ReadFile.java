@@ -61,7 +61,7 @@ public class ReadFile {
                 StringBuilder title = new StringBuilder();
                 textLine = bf.readLine();                                   ///Saltamos de .T -> al título
                 while(!textLine.matches(authorRegex)){
-                    title.append(textLine).append("\n");
+                    title.append(textLine).append(" ");
                     textLine = bf.readLine();
                 }
                 newFichero.setTitle(title.toString());
@@ -80,7 +80,7 @@ public class ReadFile {
                 textLine = bf.readLine();
                 StringBuilder text = new StringBuilder();
                 while(!textLine.matches(dataRegex)){
-                    text.append(textLine).append("\n");
+                    text.append(textLine).append(" ");
                     textLine = bf.readLine();
                 }
                 newFichero.setText(text.toString());
