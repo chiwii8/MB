@@ -31,7 +31,6 @@ public class miClienteSoljr {
             listofDocument = r.readCorpus(path);
             client.addBeans("micoleccion", listofDocument);
             client.commit("micoleccion");
-
         } catch (FileNotFoundException e) {
             System.out.println(e.getMessage());
         } catch (SolrServerException e) {

@@ -7,8 +7,6 @@ package LecturaFicheros;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.solr.client.solrj.beans.Field;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
 
 /**
  *
@@ -29,11 +27,6 @@ public class DocumentFileBean {
         this.authors = Authors;
         this.text = Text;
     }
-
-    public static String getNameClass(){
-        return "DocumentFile";
-    }
-    
     
     public String getId() {
         return id;
