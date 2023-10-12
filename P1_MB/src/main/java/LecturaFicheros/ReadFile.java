@@ -18,11 +18,11 @@ import java.util.List;
  */
 public class ReadFile {
 
-    private final String idRegex = "^\\.I\\s*\\d+";
-    private final String titleRegex = "^\\.T\\s*";
-    private final String authorRegex = "^\\.A\\s*";
-    private final String textRegex = "^\\.W\\s*";
-    private final String dataRegex = "^\\.X\\s*";
+    private final String idRegex = "^\\.I\\s*\\d+$";
+    private final String titleRegex = "^\\.T\\s*$";
+    private final String authorRegex = "^\\.A\\s*$";
+    private final String textRegex = "^\\.W\\s*$";
+    private final String dataRegex = "^\\.X\\s*$";
 
     /**
      * Lee un fichero del corpus y almacena los datos recopilados en un array
@@ -36,8 +36,8 @@ public class ReadFile {
      * @throws java.io.FileNotFoundException En caso de que el fichero no exista
      * o esté mal configurada la ruta
      */
-    public List<DocumentFile> readCorpus(String path) throws Exception, IOException, FileNotFoundException {   ///TO_DO testear el método con el corpus
-        List<DocumentFile> Data = new ArrayList<>();
+    public List<DocumentFileBean> readCorpus(String path) throws Exception, IOException, FileNotFoundException {  
+        List<DocumentFileBean> Data = new ArrayList<>();
         File file = new File(path);
         int count = 1;
         if (!file.exists()) {
@@ -49,50 +49,55 @@ public class ReadFile {
         String textLine = bf.readLine();
 
         while (textLine != null) {
-            DocumentFile newFichero = new DocumentFile();
-            System.out.println("Documento " + count);
-            if (textLine.matches(idRegex)) {                          ///ID
-                String id = textLine.replaceFirst(idRegex, "");
+            DocumentFileBean newFichero = new DocumentFileBean();
+            
+            if(textLine.matches(idRegex)){                                  ///ID
+                String id = textLine.split(" ")[1];
                 newFichero.setId(id);
                 textLine = bf.readLine();
             }
-
-            if (textLine.matches(titleRegex)) {                     ///Title
-                StringBuilder str = new StringBuilder();
-                while (!textLine.matches(authorRegex)) {                      
+            
+            if(textLine.matches(titleRegex)){                               ///Title
+                StringBuilder title = new StringBuilder();
+                textLine = bf.readLine();                                   ///Saltamos de .T -> al título
+                while(!textLine.matches(authorRegex)){
+                    title.append(textLine).append("\n");
                     textLine = bf.readLine();
-                    str.append(textLine).append("\n");
                 }
-                newFichero.setTitle(str.toString());
-                
+                newFichero.setTitle(title.toString());
             }
-  
-            if(textLine.matches(authorRegex)){///Entra              ///author
+            
+            if(textLine.matches(authorRegex)){                              ///Authors
+                textLine = bf.readLine();
                 while(!textLine.matches(textRegex)){
+                    String author = textLine;
+                    newFichero.setnewAuthor(author);
                     textLine = bf.readLine();
-                    newFichero.setnewAuthor(textLine);
                 }
             }
             
-            if (textLine.matches(textRegex)) {
-                StringBuilder str = new StringBuilder();
+            if(textLine.matches(textRegex)){
                 textLine = bf.readLine();
-                while (!textLine.matches(dataRegex)) {
-                    str.append(textLine).append("\n");
+                StringBuilder text = new StringBuilder();
+                while(!textLine.matches(dataRegex)){
+                    text.append(textLine).append("\n");
                     textLine = bf.readLine();
                 }
-                newFichero.setText(str.toString());
-            } else {  ///No se debería de dar nunca
-                throw new Exception("Se ha encontrado un fallo al localizar el texto del documento " + count);
+                newFichero.setText(text.toString());
             }
-           
-            textLine = bf.readLine();   // --> saltamos esta linea .X 
-            while (textLine != null  && !textLine.matches(idRegex)) {
-                textLine = bf.readLine();
+            
+            
+            if(textLine.matches(dataRegex)){
+                while(textLine!= null && !textLine.matches(idRegex)){
+                    textLine = bf.readLine();
+                }
             }
+            
+            
 
             count++;
             Data.add(newFichero);
+            //System.out.println(newFichero.toString());
         }
 
         return Data;
