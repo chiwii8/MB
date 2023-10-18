@@ -1,0 +1,23 @@
+{
+  "add-field": {
+    "name": "index",
+    "type": "pint",
+    "required": "true"
+  },
+  "add-field": {
+    "name": "title",
+    "type": "text_en",
+    "required": "true"
+  },
+  "add-field": {
+    "name": "authors",
+    "type": "text_en",
+    "required": "true",
+    "multiValued": "true"
+  },
+  "add-field": {
+    "name": "text_book",
+    "type": "text_en",
+    "required": "true"
+  }
+}

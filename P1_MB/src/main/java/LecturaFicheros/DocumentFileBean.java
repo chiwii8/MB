@@ -14,7 +14,7 @@ import org.apache.solr.client.solrj.beans.Field;
  */
 
 public class DocumentFileBean {
-    private String id;
+    private String index;
     private String title;
     private List<String> authors;
     private String text;
@@ -23,19 +23,19 @@ public class DocumentFileBean {
         authors = new ArrayList<>();
     }
     public DocumentFileBean(String id, ArrayList<String> Authors, String Text){
-        this.id = id;
+        this.index = id;
         this.authors = Authors;
         this.text = Text;
     }
     
-    public String getId() {
-        return id;
+    public String getIndex() {
+        return index;
     }
     
     
-    @Field("id")
-    public void setId(String id) {
-        this.id = id;
+    @Field("index")
+    public void setIndex(String index) {
+        this.index = index;
     }
 
     public String getTitle() {
@@ -72,7 +72,7 @@ public class DocumentFileBean {
     
     @Override
     public String toString(){
-        StringBuilder str = new StringBuilder("Id: ").append(id).append("\nTitle: ").append(title);
+        StringBuilder str = new StringBuilder("Index: ").append(index).append("\nTitle: ").append(title);
         for (String author : authors) {
             str.append("author: ").append(author);
         }

@@ -23,6 +23,8 @@ public class ReadFile {
     private final String authorRegex = "^\\.A\\s*$";
     private final String textRegex = "^\\.W\\s*$";
     private final String dataRegex = "^\\.X\\s*$";
+    private final String boleRegex = "^\\.B\\s*$";
+    private final String markRegex = "^\\.\\w?\\s*\\d*\\s*$";
 
     /**
      * Lee un fichero del corpus y almacena los datos recopilados en un array
@@ -36,64 +38,55 @@ public class ReadFile {
      * @throws java.io.FileNotFoundException En caso de que el fichero no exista
      * o esté mal configurada la ruta
      */
-    public List<DocumentFileBean> readCorpus(String path) throws Exception, IOException, FileNotFoundException {  
+    public List<DocumentFileBean> readCorpus(String path) throws Exception, IOException, FileNotFoundException {
         List<DocumentFileBean> Data = new ArrayList<>();
-        File file = new File(path);
         int count = 1;
-        if (!file.exists()) {
-            throw new FileNotFoundException("El fichero que intentas leer no existe.");
-        }
-
-        FileReader filereader = new FileReader(path);
-        BufferedReader bf = new BufferedReader(filereader);
+        BufferedReader bf = readDocument(path);
         String textLine = bf.readLine();
 
         while (textLine != null) {
             DocumentFileBean newFichero = new DocumentFileBean();
-            
-            if(textLine.matches(idRegex)){                                  ///ID
-                String id = textLine.split(" ")[1];
-                newFichero.setId(id);
+
+            if (textLine.matches(idRegex)) {                                  ///ID
+                String index = textLine.split(" ")[1];
+                newFichero.setIndex(index);
                 textLine = bf.readLine();
             }
-            
-            if(textLine.matches(titleRegex)){                               ///Title
+
+            if (textLine.matches(titleRegex)) {                               ///Title
                 StringBuilder title = new StringBuilder();
                 textLine = bf.readLine();                                   ///Saltamos de .T -> al título
-                while(!textLine.matches(authorRegex)){
+                while (!textLine.matches(authorRegex)) {
                     title.append(textLine).append(" ");
                     textLine = bf.readLine();
                 }
                 newFichero.setTitle(title.toString());
             }
-            
-            if(textLine.matches(authorRegex)){                              ///Authors
+
+            if (textLine.matches(authorRegex)) {                              ///Authors
                 textLine = bf.readLine();
-                while(!textLine.matches(textRegex)){
+                while (!textLine.matches(textRegex)) {
                     String author = textLine;
                     newFichero.setnewAuthor(author);
                     textLine = bf.readLine();
                 }
             }
-            
-            if(textLine.matches(textRegex)){
+
+            if (textLine.matches(textRegex)) {
                 textLine = bf.readLine();
                 StringBuilder text = new StringBuilder();
-                while(!textLine.matches(dataRegex)){
+                while (!textLine.matches(dataRegex)) {
                     text.append(textLine).append(" ");
                     textLine = bf.readLine();
                 }
                 newFichero.setText(text.toString());
             }
-            
-            
-            if(textLine.matches(dataRegex)){
-                while(textLine!= null && !textLine.matches(idRegex)){
+
+            if (textLine.matches(dataRegex)) {
+                while (textLine != null && !textLine.matches(idRegex)) {
                     textLine = bf.readLine();
                 }
             }
-            
-            
 
             count++;
             Data.add(newFichero);
@@ -104,10 +97,90 @@ public class ReadFile {
     }
 
     /**
+     * Version de prueba que nos permite saber si podemos emplear el caso
+     * anterior de ReadCorpus
      *
      * @param path Realizar para la versión 0.2
+     * @return devuelve una lista con todas las queries que tiene que hacer con su correspondientes datos
      */
-    public void readConsultas(String path) {
+    public List<QuerySolr> readConsultas(String path) throws FileNotFoundException, IOException {
+        List<QuerySolr> Data = new ArrayList<>();
+        File file = new File(path);
+        int count = 1;
 
+        /// Revisar si se puede poner en un método y desacoplarlo
+        if (!file.exists()) {
+            throw new FileNotFoundException("El fichero de consultas que intentas leer no existe");
+        }
+
+        FileReader filereader = new FileReader(path);
+        BufferedReader bf = new BufferedReader(filereader);
+
+        String textLine = bf.readLine();
+
+        while (textLine != null) {
+            QuerySolr newQuery = new QuerySolr();
+            if (textLine.matches(idRegex)) {                                  ///ID
+                String index = textLine.split(" ")[1];
+                newQuery.setIndex(index);
+                textLine = bf.readLine();
+            }
+
+            if (textLine.matches(titleRegex)) {                               ///Title
+                StringBuilder title = new StringBuilder();
+                textLine = bf.readLine();                                   ///Saltamos de .T -> al título
+                while (!textLine.matches(markRegex)) {
+                    title.append(textLine).append(" ");
+                    textLine = bf.readLine();
+                }
+                newQuery.setTitle(title.toString());
+            }
+            
+            if (textLine.matches(authorRegex)) {                              ///Authors
+                textLine = bf.readLine();
+                while (!textLine.matches(textRegex)) {
+                    String author = textLine;
+                    newQuery.setnewAuthor(author);
+                    textLine = bf.readLine();
+                }
+            }
+
+            if (textLine.matches(textRegex)) {                                ///Text
+                StringBuilder str = new StringBuilder();
+                textLine = bf.readLine();
+                while (textLine != null && !textLine.matches(markRegex)) {
+                    str.append(textLine);
+                    textLine = bf.readLine();
+                }
+                newQuery.setText(str.toString());
+            }
+            
+            if (textLine.matches(boleRegex)) {
+                while (textLine != null && !textLine.matches(idRegex)) {
+                    textLine = bf.readLine();
+                }
+            }
+            
+            Data.add(newQuery);
+        }
+
+        return Data;
+    }
+    
+    /**
+     * Método que devuelve un fichero abierto y listo para leer 
+     * 
+     * @param path Dirección donde se encuentra el fichero
+     * @return Devuelve el fichero abierto y listo para leer
+     * @throws FileNotFoundException Indica que el fichero no existe en ese directorio
+     */
+    public BufferedReader readDocument(String path) throws FileNotFoundException{
+        File file = new File(path);
+        if (!file.exists()) {
+            throw new FileNotFoundException("El fichero que intentas leer no existe.");
+        }
+        FileReader filereader = new FileReader(path);
+        
+        return new BufferedReader(filereader);
     }
 }
