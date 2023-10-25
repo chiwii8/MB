@@ -65,7 +65,7 @@ public class DocumentFileBean {
         return text;
     }
 
-    @Field("text")
+    @Field("text_book")
     public void setText(String Text) {
         this.text = Text;
     }   

@@ -5,7 +5,6 @@
 package LecturaFicheros;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -72,11 +71,14 @@ public class QuerySolr {
     }
 
     public String getQueryNWordsText(int nWords) {
+        StringBuilder result = new StringBuilder("text_book:");
         String[] aux = text.split(" ");
-        StringBuilder result = new StringBuilder("text:");
-
-        for (int i = 0; i < nWords; i++) {
-            result.append(aux[i]).append(" ");
+        if (aux.length > nWords) {
+            for (int i = 0; i < nWords; i++) {
+                result.append(aux[i]).append(" ");
+            }
+        } else {
+            result.append(text);
         }
 
         return result.toString();
@@ -86,13 +88,13 @@ public class QuerySolr {
         StringBuilder query = new StringBuilder();
 
         if (title != null) {                                                  ///No nos fijamos en los titulos que no sean el pasado por parámetro
-            query.append("title:(").append(title).append(")\n");
+            query.append("title:(").append(title).append(")");
         }
         if (!authors.isEmpty()) {
-            query.append("authors:").append(authors.toArray());
+            query.append(" authors:").append(authors.toArray());
         }
         if (text != null) {
-            query.append("text:").append(text).append("\n");
+            query.append(" text_book:").append(text).append("\n");
         }
         return query.toString();
     }

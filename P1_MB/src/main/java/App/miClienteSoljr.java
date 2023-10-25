@@ -26,15 +26,16 @@ import org.apache.solr.common.SolrDocumentList;
  */
 public class miClienteSoljr {
 
-    public final static String pathCorpus = "C:\\Users\\aleja\\git\\MB\\CISI.ALL";
-    public final static String pathQuery = "C:\\Users\\aleja\\git\\MB\\CISI.QRY";
-    private final static String collectionSolr = "micoleccion";
-    private final static int numWordsQuery = 5;
+    public  static String pathCorpus = "C:\\Users\\aleja\\git\\MB\\CISI.ALL";
+    public static String pathQuery = "C:\\Users\\aleja\\git\\MB\\CISI.QRY";
+    private static final String collectionSolr = "micoleccion";
+    private static final int numWordsQuery = 5;
+    
 
     public static void main(String[] args) throws SolrServerException, IOException {
         SolrClient client = new Http2SolrClient.Builder("http://localhost:8983/solr").build();
         //Nueva forma de indexación de los documentos
-        List<DocumentFileBean> listofDocument = null;
+        List<DocumentFileBean> listofDocument;
         List<QuerySolr> listOfQueries = null;
         ReadFile r = new ReadFile();
         int opt;
@@ -43,7 +44,7 @@ public class miClienteSoljr {
             do {
                 opt = Menu();
                 switch (opt) {
-                    case 1 -> {
+                    case 1 -> {                                             ///Carga los valores en el corpus
                         listofDocument = r.readCorpus(pathCorpus);
                         client.addBeans(collectionSolr, listofDocument);
                         client.commit(collectionSolr);
@@ -53,18 +54,21 @@ public class miClienteSoljr {
                         System.out.println("Se han leido las consultas");
                     }
                     case 3 -> {                                             ///Lanzar la primera consulta
-                        if (!listOfQueries.isEmpty()) {
-                            
+                        if (listOfQueries!=null) {
                             SolrQuery query = new SolrQuery();
-                            QuerySolr example = listOfQueries.get(0);
-                            query.setQuery(example.getQueryNWordsText(numWordsQuery));
-                            QueryResponse rsp = client.query(collectionSolr,query);
-                            SolrDocumentList docs = rsp.getResults();
-                            for (int i = 0; i < docs.size(); ++i) {
-                                System.out.println(docs.get(i));
+                            for (int j = 0; j < listOfQueries.size();j++) {
+                                System.out.println("Consulta " + j +":");
+                                QuerySolr example = listOfQueries.get(j);
+                                query.setQuery(example.getQueryNWordsText(numWordsQuery));
+                                QueryResponse rsp = client.query(collectionSolr, query);
+                                SolrDocumentList docs = rsp.getResults();
+                                for (int i = 0; i < docs.size(); i++) {
+                                    System.out.println(docs.get(i));
+                                }
                             }
+
                         } else {
-                            System.out.println("No hay consultas en la lista");
+                            System.out.println("La lista de consultas está vacía");
                         }
                     }
                     case 0 -> {                                             ///Fin programa
@@ -98,6 +102,7 @@ public class miClienteSoljr {
         System.out.println("1. Cargar Corpus");
         System.out.println("2. Cargar Consultas");
         System.out.println("3. Lanzar Consulta");
+        System.out.println("0. Salir");
         System.out.println("---------------------");
         System.out.print("Selecciona una opcion: ");
         option = in.nextInt();

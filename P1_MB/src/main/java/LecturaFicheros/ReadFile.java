@@ -32,11 +32,12 @@ public class ReadFile {
      * @param path es el camino al archivo destino
      * @return devuelve un array con los datos del corpus recopilados en un
      * array
+     *
      * @throws java.lang.Exception Fallo al localizar una parte del fichero a
      * parsear
+     *
      * @throws java.io.IOException
-     * @throws java.io.FileNotFoundException En caso de que el fichero no exista
-     * o esté mal configurada la ruta
+     * @throws java.io.FileNotFoundException
      */
     public List<DocumentFileBean> readCorpus(String path) throws Exception, IOException, FileNotFoundException {
         List<DocumentFileBean> Data = new ArrayList<>();
@@ -92,7 +93,7 @@ public class ReadFile {
             Data.add(newFichero);
             //System.out.println(newFichero.toString());
         }
-
+        bf.close();
         return Data;
     }
 
@@ -101,21 +102,14 @@ public class ReadFile {
      * anterior de ReadCorpus
      *
      * @param path Realizar para la versión 0.2
-     * @return devuelve una lista con todas las queries que tiene que hacer con su correspondientes datos
+     * @return devuelve una lista con todas las queries que tiene que hacer con
+     * su correspondientes datos
+     * @throws java.io.FileNotFoundException
      */
     public List<QuerySolr> readConsultas(String path) throws FileNotFoundException, IOException {
         List<QuerySolr> Data = new ArrayList<>();
-        File file = new File(path);
-        int count = 1;
-
-        /// Revisar si se puede poner en un método y desacoplarlo
-        if (!file.exists()) {
-            throw new FileNotFoundException("El fichero de consultas que intentas leer no existe");
-        }
-
-        FileReader filereader = new FileReader(path);
-        BufferedReader bf = new BufferedReader(filereader);
-
+        
+        BufferedReader bf = readDocument(path);
         String textLine = bf.readLine();
 
         while (textLine != null) {
@@ -135,7 +129,7 @@ public class ReadFile {
                 }
                 newQuery.setTitle(title.toString());
             }
-            
+
             if (textLine.matches(authorRegex)) {                              ///Authors
                 textLine = bf.readLine();
                 while (!textLine.matches(textRegex)) {
@@ -154,33 +148,34 @@ public class ReadFile {
                 }
                 newQuery.setText(str.toString());
             }
-            
-            if (textLine.matches(boleRegex)) {
+
+            if (textLine!=null && textLine.matches(boleRegex)) {
                 while (textLine != null && !textLine.matches(idRegex)) {
                     textLine = bf.readLine();
                 }
             }
-            
+
             Data.add(newQuery);
         }
-
+        bf.close();
         return Data;
     }
-    
+
     /**
-     * Método que devuelve un fichero abierto y listo para leer 
-     * 
+     * Método que devuelve un fichero abierto y listo para leer
+     *
      * @param path Dirección donde se encuentra el fichero
      * @return Devuelve el fichero abierto y listo para leer
-     * @throws FileNotFoundException Indica que el fichero no existe en ese directorio
+     * @throws FileNotFoundException Indica que el fichero no existe en ese
+     * directorio
      */
-    public BufferedReader readDocument(String path) throws FileNotFoundException{
+    public BufferedReader readDocument(String path) throws FileNotFoundException {
         File file = new File(path);
         if (!file.exists()) {
             throw new FileNotFoundException("El fichero que intentas leer no existe.");
         }
         FileReader filereader = new FileReader(path);
-        
+
         return new BufferedReader(filereader);
     }
 }
