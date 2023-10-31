@@ -17,7 +17,8 @@ import org.apache.solr.common.SolrDocumentList;
  * @author alejandro
  */
 public class WriteFile {
-    
+
+    private static String TREC_EVAL_PATH = "..\\TREC_TOP_EVAL.trec";
     private static String phase = "Q0";
     private static String team = "etsi";
     private static final String NAME_INDEX_ATTRIBUTE = "index";
@@ -32,13 +33,24 @@ public class WriteFile {
      * Evaluar
      * @throws java.io.IOException
      */
-    public static void writeTREC_EVAL(String path, List<SolrDocumentList> documentResults) throws IOException {
-        BufferedWriter writer = writeDocument(path);
+    public static void generateTREC_EVAL(String path, List<SolrDocumentList> documentResults) throws IOException, Exception {
+        BufferedWriter writer = createDocument();
         if (writer != null) {
-            
+            String FormattedDocument;
+            for (int i = 0; i < documentResults.size(); i++) {
+                SolrDocumentList listOfDocument = documentResults.get(i);
+                for (int j = 0; j < listOfDocument.size(); j++) {
+                    FormattedDocument = formatSolrDocumentToTrecEval(listOfDocument.get(j), i + 1, j);
+                    writer.write(FormattedDocument);
+                    writer.newLine();
+                }
+
+            }
+            writer.flush();
         } else {
             System.out.println("Error: El fichero que intentas crear ya existe");
         }
+
     }
 
     /**
@@ -48,11 +60,19 @@ public class WriteFile {
      * crear
      * @return devuelve el fichero listo para escribir
      */
-    private static BufferedWriter writeDocument(String path) throws IOException {
-        File newFile = new File(path);
+    private static BufferedWriter createDocument() throws IOException,Exception {
+        File newFile = new File(TREC_EVAL_PATH);
 
         if (!newFile.exists()) {
             newFile.createNewFile();
+        } else {
+            if (newFile.isFile()) {
+                newFile.delete();           ///Eliminamos si el fichero existe 
+                newFile.createNewFile();
+            }else{
+                System.out.println("La dirección pasada no es un fichero, sino un directorio");
+            }
+
         }
 
         FileWriter writer = new FileWriter(newFile);
@@ -63,16 +83,17 @@ public class WriteFile {
      * Formatea un SolrDocument de la siguiente forma
      *
      * nºConsulta Fase nºdocumento ranking score equipo
-     * 
-     * número de documento: Es el índice del documento que tiene desigando por defecto
-     * score: Es una puntuación realizada por solr para calificar el resultado obtenido
-     * equipo:Nombre del equipo
+     *
+     * número de documento: Es el índice del documento que tiene desigando por
+     * defecto score: Es una puntuación realizada por solr para calificar el
+     * resultado obtenido equipo:Nombre del equipo
+     *
      * @param nConsult Número de consulta
      * @param ranking rango obtenido en la búsqueda
      * @param documentToFormat documento que se va ha formatear
      * @return
      */
-    private static String FormatSolrDocumentToTrecEval(SolrDocument documentToFormat, int nConsult, int ranking) {
+    private static String formatSolrDocumentToTrecEval(SolrDocument documentToFormat, int nConsult, int ranking) {
         StringBuilder result = new StringBuilder();
 
         String index = documentToFormat
@@ -109,7 +130,13 @@ public class WriteFile {
     public static void setTeam(String team) {
         WriteFile.team = team;
     }
-    
-    
+
+    public static String getTREC_EVAL_PATH() {
+        return TREC_EVAL_PATH;
+    }
+
+    public static void setTREC_EVAL_PATH(String TREC_EVAL_PATH) {
+        WriteFile.TREC_EVAL_PATH = TREC_EVAL_PATH;
+    }
 
 }
