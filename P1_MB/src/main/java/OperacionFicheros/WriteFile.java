@@ -18,9 +18,9 @@ import org.apache.solr.common.SolrDocumentList;
  */
 public class WriteFile {
 
-    private static String TREC_EVAL_PATH = "..\\TREC_TOP_EVAL.trec";
     private static String phase = "Q0";
     private static String team = "etsi";
+    private static String TREC_EVAL_PATH = "..\\TREC_TOP_EVAL.trec";
     private static final String NAME_INDEX_ATTRIBUTE = "index";
     private static final String NAME_SCORE_ATTRIBUTE = "score";
 
@@ -33,7 +33,7 @@ public class WriteFile {
      * Evaluar
      * @throws java.io.IOException
      */
-    public static void generateTREC_EVAL(String path, List<SolrDocumentList> documentResults) throws IOException, Exception {
+    public static void generateTREC_EVAL(List<SolrDocumentList> documentResults) throws IOException, Exception {
         BufferedWriter writer = createDocument();
         if (writer != null) {
             String FormattedDocument;

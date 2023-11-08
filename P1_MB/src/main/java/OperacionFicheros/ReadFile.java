@@ -27,6 +27,7 @@ public class ReadFile {
     private final String dataRegex = "^\\.X\\s*$";
     private final String boleRegex = "^\\.B\\s*$";
     private final String markRegex = "^\\.\\w?\\s*\\d*\\s*$";
+    private final String specialCharacterRegex="[+\\-\\&|\\(\\)\"\'\\~\\*\\?\\:]";
 
     /**
      * Lee un fichero del corpus y almacena los datos recopilados en un array
@@ -50,7 +51,7 @@ public class ReadFile {
         while (textLine != null) {
             DocumentFileBean newFichero = new DocumentFileBean();
 
-            if (textLine.matches(idRegex)) {                                  ///ID
+            if (textLine.matches(idRegex)) {                                  ///ID 
                 String index = textLine.split(" ")[1];
                 newFichero.setIndex(index);
                 textLine = bf.readLine();
@@ -58,12 +59,13 @@ public class ReadFile {
 
             if (textLine.matches(titleRegex)) {                               ///Title
                 StringBuilder title = new StringBuilder();
-                textLine = bf.readLine();                                   ///Saltamos de .T -> al título
+                textLine = bf.readLine();                              ///Saltamos de .T -> al título
                 while (!textLine.matches(authorRegex)) {
                     title.append(textLine).append(" ");
                     textLine = bf.readLine();
                 }
-                newFichero.setTitle(title.toString());
+                String aux = title.toString().trim();
+                newFichero.setTitle(aux);
             }
 
             if (textLine.matches(authorRegex)) {                              ///Authors
@@ -75,14 +77,15 @@ public class ReadFile {
                 }
             }
 
-            if (textLine.matches(textRegex)) {
+            if (textLine.matches(textRegex)) {                                ///Text
                 textLine = bf.readLine();
                 StringBuilder text = new StringBuilder();
                 while (!textLine.matches(dataRegex)) {
                     text.append(textLine).append(" ");
                     textLine = bf.readLine();
                 }
-                newFichero.setText(text.toString());
+                String aux = text.toString().trim();
+                newFichero.setText(aux);
             }
 
             if (textLine.matches(dataRegex)) {
@@ -129,7 +132,8 @@ public class ReadFile {
                     title.append(textLine).append(" ");
                     textLine = bf.readLine();
                 }
-                newQuery.setTitle(title.toString());
+                String aux = title.toString().trim();
+                newQuery.setTitle(aux);
             }
 
             if (textLine.matches(authorRegex)) {                              ///Authors
@@ -142,13 +146,14 @@ public class ReadFile {
             }
 
             if (textLine.matches(textRegex)) {                                ///Text
-                StringBuilder str = new StringBuilder();
+                StringBuilder text = new StringBuilder();
                 textLine = bf.readLine();
                 while (textLine != null && !textLine.matches(markRegex)) {
-                    str.append(textLine);
+                    text.append(textLine).append(" ");
                     textLine = bf.readLine();
                 }
-                newQuery.setText(str.toString());
+                String aux = text.toString().trim();
+                newQuery.setText(aux);
             }
 
             if (textLine!=null && textLine.matches(boleRegex)) {

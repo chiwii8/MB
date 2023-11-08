@@ -18,7 +18,7 @@ public class QuerySolr {
     private List<String> authors;
     private String text;
     private String boletin;
-
+    private final String REGEX_SPECIAL_CHARACTERS = "[+\\-\\&|\\(\\)\"\'\\~\\*\\?\\:]";
     public QuerySolr() {
         title = null;
         authors = new ArrayList<>();
@@ -72,30 +72,40 @@ public class QuerySolr {
 
     public String getQueryNWordsText(int nWords) {
         StringBuilder result = new StringBuilder("text_book:");
-        String[] aux = text.split(" ");
-        if (aux.length > nWords) {
+        
+        
+        String text_aux = text.replaceAll(REGEX_SPECIAL_CHARACTERS, "");
+        String[] aux = text_aux.split(" ");
+        
+        if (nWords>0 && aux.length > nWords){
             for (int i = 0; i < nWords; i++) {
                 result.append(aux[i]).append(" ");
             }
         } else {
-            result.append(text);
+            result.append(text_aux);
         }
-
+        //System.out.println(result.toString());
         return result.toString();
     }
-
+    
+    
     public String getQuery() {
         StringBuilder query = new StringBuilder();
 
-        if (title != null) {                                                  ///No nos fijamos en los titulos que no sean el pasado por parámetro
-            query.append("title:(").append(title).append(")");
+        if (title != null) {                                               ///No nos fijamos en los titulos que no sean el pasado por parámetro
+            String title_aux = title.replaceAll(REGEX_SPECIAL_CHARACTERS, "");
+            query.append("title:(").append(title_aux).append(")\n");
         }
-        if (!authors.isEmpty()) {
-            query.append(" authors:").append(authors.toArray());
+        if (!authors.isEmpty()){
+            String author_aux = authors.toString().replaceAll("[\\[\\]]", "");
+            query.append("authors: ").append(author_aux).append("\n");
         }
-        if (text != null) {
-            query.append(" text_book:").append(text).append("\n");
+        if (text != null){
+            String text_aux = text.replaceAll(REGEX_SPECIAL_CHARACTERS, "");
+            query.append("text_book:").append(text_aux).append("\n");
         }
+        
+        //System.out.println(query.toString());
         return query.toString();
     }
     
