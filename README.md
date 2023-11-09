@@ -10,5 +10,5 @@ Objetivos a conseguir:
 
 ✔️ Tomar las 5 primeras palabras y lanza consulta a solrj. Mostrando el resultado
 
-- Construye un fichero en formato "trec_top_file"
-- Poder ejecutar la evaluación con trec_eval
+✔️ Construye un fichero en formato "trec_top_file"
+✔️ Poder ejecutar la evaluación con trec_eval
