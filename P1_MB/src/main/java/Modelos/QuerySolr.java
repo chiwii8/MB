@@ -4,6 +4,7 @@
  */
 package Modelos;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,8 @@ public class QuerySolr {
     private List<String> authors;
     private String text;
     private String boletin;
-    private final String REGEX_SPECIAL_CHARACTERS = "[+\\-\\&|\\(\\)\"\'\\~\\*\\?\\:]";
+      
+    private final String REGEX_SPECIAL_CHARACTERS = "[+\\-\\&|\\(\\)\\{\\}\\[\\]\\^\"\'\\~\\*\\?\\:\\!\\/]";
     public QuerySolr() {
         title = null;
         authors = new ArrayList<>();
@@ -74,7 +76,7 @@ public class QuerySolr {
         StringBuilder result = new StringBuilder("text_book:");
         
         
-        String text_aux = text.replaceAll(REGEX_SPECIAL_CHARACTERS, "");
+        String text_aux = text.replaceAll(REGEX_SPECIAL_CHARACTERS,"");
         String[] aux = text_aux.split(" ");
         
         if (nWords>0 && aux.length > nWords){
@@ -85,7 +87,8 @@ public class QuerySolr {
             result.append(text_aux);
         }
         //System.out.println(result.toString());
-        return result.toString();
+        String returned = result.toString().replaceAll(" ", "+");
+        return returned;
     }
     
     
@@ -96,17 +99,23 @@ public class QuerySolr {
             String title_aux = title.replaceAll(REGEX_SPECIAL_CHARACTERS, "");
             query.append("title:(").append(title_aux).append(")\n");
         }
-        if (!authors.isEmpty()){
-            String author_aux = authors.toString().replaceAll("[\\[\\]]", "");
+        if (!authors.isEmpty()){                                                    ///TODO Poner que los autores  estén cualquiera de los mencionados
+            String author_aux = authors.toString().replaceAll("[\\[\\]]", "");      ///Mirar los resultados obtenidos son mejores
             query.append("authors: ").append(author_aux).append("\n");
         }
         if (text != null){
             String text_aux = text.replaceAll(REGEX_SPECIAL_CHARACTERS, "");
-            query.append("text_book:").append(text_aux).append("\n");
+            query.append("text_book:").append(getQueryNWordsText(-1)).append("\n");
         }
         
         //System.out.println(query.toString());
         return query.toString();
+    }
+    
+    
+    private String getformatString(String stringFormat){
+        String result = stringFormat.replaceAll(REGEX_SPECIAL_CHARACTERS, "");
+        return result;
     }
     
 }
