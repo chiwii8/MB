@@ -26,9 +26,8 @@ public class WriteFile {
 
     /**
      * *
-     * Crea un fichero en formato 'TREC_TOP_EVAL'
+     * Crea un fichero en formato 'TREC_TOP_EVAL' a través de las consultas realizadas
      *
-     * @param path dirección absoluta o relativa del fichero que quiere crear
      * @param documentResults Los resultados de las consultas de solr para
      * Evaluar
      * @throws java.io.IOException

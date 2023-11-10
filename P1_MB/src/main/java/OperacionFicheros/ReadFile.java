@@ -4,13 +4,11 @@
  */
 package OperacionFicheros;
 
-import Modelos.QuerySolr;
-import Modelos.DocumentFileBean;
+import Modelos.Document;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,11 +24,13 @@ public class ReadFile {
     private final String textRegex = "^\\.W\\s*$";
     private final String dataRegex = "^\\.X\\s*$";
     private final String boleRegex = "^\\.B\\s*$";
+    private final String typeinfoRegex = "^\\.K\\s*$";
+    private final String valueRegex = "^\\.C\\s*$";
     private final String markRegex = "^\\.\\w?\\s*\\d*\\s*$";
-    private final String specialCharacterRegex="[+\\-\\&|\\(\\)\"\'\\~\\*\\?\\:]";
+    private final String specialCharacterRegex = "[+\\-\\&|\\(\\)\"\'\\~\\*\\?\\:]";
 
     /**
-     * Lee un fichero del corpus y almacena los datos recopilados en un array
+     * Lee los ficheros del corpus y las consultas
      *
      * @param path es el camino al archivo destino
      * @return devuelve un array con los datos del corpus recopilados en un
@@ -42,130 +42,81 @@ public class ReadFile {
      * @throws java.io.IOException
      * @throws java.io.FileNotFoundException
      */
-    public List<DocumentFileBean> readCorpus(String path) throws Exception, IOException, FileNotFoundException {
-        List<DocumentFileBean> Data = new ArrayList<>();
-        int count = 1;
-        BufferedReader bf = readDocument(path);
+    public List<Document> readDocuments(String path) throws Exception {
+        List<Document> documents = new ArrayList<>();
+
+        BufferedReader bf = openDocument(path);
         String textLine = bf.readLine();
 
         while (textLine != null) {
-            DocumentFileBean newFichero = new DocumentFileBean();
+            Document newDocument = new Document();
+            do {
 
-            if (textLine.matches(idRegex)) {                                  ///ID 
-                String index = textLine.split(" ")[1];
-                newFichero.setIndex(index);
-                textLine = bf.readLine();
-            }
-
-            if (textLine.matches(titleRegex)) {                               ///Title
-                StringBuilder title = new StringBuilder();
-                textLine = bf.readLine();                              ///Saltamos de .T -> al título
-                while (!textLine.matches(authorRegex)) {
-                    title.append(textLine).append(" ");
+                if (textLine.matches(idRegex)) {
+                    newDocument.setIndex(textLine.split("\\s+")[1]);
                     textLine = bf.readLine();
                 }
-                String aux = title.toString().trim();
-                newFichero.setTitle(aux);
-            }
 
-            if (textLine.matches(authorRegex)) {                              ///Authors
-                textLine = bf.readLine();
-                while (!textLine.matches(textRegex)) {
-                    String author = textLine;
-                    newFichero.setnewAuthor(author);
-                    textLine = bf.readLine();
+                if (textLine!=null && textLine.matches(titleRegex)) {
+                    StringBuilder title = new StringBuilder("");
+                    while ((textLine = bf.readLine()) != null && !textLine.matches(markRegex)) {
+                        title.append(textLine).append(" ");
+                        
+                    }
+                    newDocument.setTitle(title.toString().strip());
                 }
-            }
 
-            if (textLine.matches(textRegex)) {                                ///Text
-                textLine = bf.readLine();
-                StringBuilder text = new StringBuilder();
-                while (!textLine.matches(dataRegex)) {
-                    text.append(textLine).append(" ");
-                    textLine = bf.readLine();
+                if (textLine !=null && textLine.matches(authorRegex)) {
+                    while ((textLine = bf.readLine()) != null && !textLine.matches(markRegex)) {
+                        newDocument.setnewAuthor(textLine);
+                    }
                 }
-                String aux = text.toString().trim();
-                newFichero.setText(aux);
-            }
 
-            if (textLine.matches(dataRegex)) {
-                while (textLine != null && !textLine.matches(idRegex)) {
-                    textLine = bf.readLine();
+                if (textLine!= null && textLine.matches(boleRegex)) {
+                    StringBuilder boletin = new StringBuilder("");
+
+                    while ((textLine = bf.readLine()) != null && !textLine.matches(markRegex)) {
+                        boletin.append(textLine).append(" ");
+                    }
+                    newDocument.setBoletin(boletin.toString().strip());
                 }
-            }
 
-            count++;
-            Data.add(newFichero);
-            //System.out.println(newFichero.toString());
+                if (textLine!= null && textLine.matches(textRegex)) {
+                    StringBuilder text = new StringBuilder("");
+                    while ((textLine = bf.readLine()) != null && !textLine.matches(markRegex)) {
+                        text.append(textLine).append(" ");
+                    }
+                    newDocument.setText(text.toString().strip());
+                }
+
+                if (textLine!= null &&textLine.matches(typeinfoRegex)) {
+                    StringBuilder info = new StringBuilder("");
+                    while ((textLine = bf.readLine()) != null && !textLine.matches(markRegex)) {
+                        info.append(textLine).append(" ");
+                    }
+                    newDocument.setTypeInformation(info.toString().strip());
+                }
+
+                if (textLine!= null && textLine.matches(valueRegex)) {
+                    StringBuilder value = new StringBuilder("");
+                    while ((textLine = bf.readLine()) != null && !textLine.matches(markRegex)) {
+                        value.append(textLine).append(" ");
+                    }
+                    newDocument.setValue(value.toString().strip());
+                }
+
+                if (textLine!= null && textLine.matches(dataRegex)) {
+                    while ((textLine = bf.readLine()) != null && !textLine.matches(markRegex)) {
+                    }
+                }
+
+            } while (textLine != null && !textLine.matches(idRegex));
+
+            //System.out.println(newDocument);
+            documents.add(newDocument);
         }
         bf.close();
-        return Data;
-    }
-
-    /**
-     * Version de prueba que nos permite saber si podemos emplear el caso
-     * anterior de ReadCorpus
-     *
-     * @param path Realizar para la versión 0.2
-     * @return devuelve una lista con todas las queries que tiene que hacer con
-     * su correspondientes datos
-     * @throws java.io.FileNotFoundException
-     */
-    public List<QuerySolr> readConsultas(String path) throws FileNotFoundException, IOException {
-        List<QuerySolr> Data = new ArrayList<>();
-        
-        BufferedReader bf = readDocument(path);
-        String textLine = bf.readLine();
-
-        while (textLine != null) {
-            QuerySolr newQuery = new QuerySolr();
-            if (textLine.matches(idRegex)) {                                  ///ID
-                String index = textLine.split(" ")[1];
-                newQuery.setIndex(index);
-                textLine = bf.readLine();
-            }
-
-            if (textLine.matches(titleRegex)) {                               ///Title
-                StringBuilder title = new StringBuilder();
-                textLine = bf.readLine();                                   ///Saltamos de .T -> al título
-                while (!textLine.matches(markRegex)) {
-                    title.append(textLine).append(" ");
-                    textLine = bf.readLine();
-                }
-                String aux = title.toString().trim();
-                newQuery.setTitle(aux);
-            }
-
-            if (textLine.matches(authorRegex)) {                              ///Authors
-                textLine = bf.readLine();
-                while (!textLine.matches(textRegex)) {
-                    String author = textLine;
-                    newQuery.setnewAuthor(author);
-                    textLine = bf.readLine();
-                }
-            }
-
-            if (textLine.matches(textRegex)) {                                ///Text
-                StringBuilder text = new StringBuilder();
-                textLine = bf.readLine();
-                while (textLine != null && !textLine.matches(markRegex)) {
-                    text.append(textLine).append(" ");
-                    textLine = bf.readLine();
-                }
-                String aux = text.toString().trim();
-                newQuery.setText(aux);
-            }
-
-            if (textLine!=null && textLine.matches(boleRegex)) {
-                while (textLine != null && !textLine.matches(idRegex)) {
-                    textLine = bf.readLine();
-                }
-            }
-
-            Data.add(newQuery);
-        }
-        bf.close();
-        return Data;
+        return documents;
     }
 
     /**
@@ -176,7 +127,7 @@ public class ReadFile {
      * @throws FileNotFoundException Indica que el fichero no existe en ese
      * directorio
      */
-    public BufferedReader readDocument(String path) throws FileNotFoundException {
+    private BufferedReader openDocument(String path) throws FileNotFoundException {
         File file = new File(path);
         if (!file.exists()) {
             throw new FileNotFoundException("El fichero que intentas leer no existe.");
@@ -185,4 +136,5 @@ public class ReadFile {
 
         return new BufferedReader(filereader);
     }
+
 }

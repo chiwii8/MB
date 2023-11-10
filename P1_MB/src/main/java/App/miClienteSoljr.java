@@ -4,8 +4,7 @@
  */
 package App;
 
-import Modelos.DocumentFileBean;
-import Modelos.QuerySolr;
+import Modelos.Document;
 import OperacionFicheros.ReadFile;
 import OperacionFicheros.WriteFile;
 import java.io.File;
@@ -33,34 +32,32 @@ public class miClienteSoljr {
 
     public static String pathCorpus = "..\\CISI.ALL";
     public static String pathQuery = "..\\CISI.QRY";
-    private static final String COLLECTION_SOLR_NAME_DEFAULT = "micoleccion";
+    private static final String COLLECTION_SOLR_NAME_DEFAULT = "corpus";
     private static final int NUMBER_OF_WORDS_SELECTED_TO_QUERIES = 5;
 
     public static void main(String[] args) throws SolrServerException, IOException {
         SolrClient client = new Http2SolrClient.Builder("http://localhost:8983/solr").build();
         //Nueva forma de indexación de los documentos
-        List<DocumentFileBean> listofDocument;
-        List<QuerySolr> listOfQueries = null;
+        List<Document> listofDocument;
+        List<Document> listOfQueries = null;
         ReadFile r = new ReadFile();
         int opt;
-
-        File f = new File("./CISI.ALL");
-        System.out.println(f.getAbsolutePath());
         try {
             do {
                 opt = Menu();
                 switch (opt) {
                     case 1 -> {                                             ///Carga los valores en el corpus
-                        listofDocument = r.readCorpus(pathCorpus);
+                        listofDocument = r.readDocuments(pathCorpus);
                         client.addBeans(COLLECTION_SOLR_NAME_DEFAULT, listofDocument);
                         client.commit(COLLECTION_SOLR_NAME_DEFAULT);
                     }
                     case 2 -> {                                             ///Cargar consultas
-                        listOfQueries = r.readConsultas(pathQuery);
+                        listOfQueries = r.readDocuments(pathQuery);
                         System.out.println("Se han leido las consultas");
                     }
                     case 3 -> {                                             ///Lanzar todas las consultas
                         if (listOfQueries != null) {
+                            System.out.println("Se han lanzado las consultas");
                             doQuery(client, listOfQueries);
                         } else {
                             System.out.println("La lista de consultas está vacía");
@@ -123,15 +120,14 @@ public class miClienteSoljr {
     public static SolrQuery configureQueryTrecEval() {
         SolrQuery newquery = new SolrQuery();
         newquery.set("fl", "index,score");
-
         return newquery;
     }
 
-    public static void doQuery(SolrClient client, List<QuerySolr> queries) throws SolrServerException, IOException {
-        SolrQuery query = new SolrQuery();
+    public static void doQuery(SolrClient client, List<Document> queries) throws SolrServerException, IOException {
+
         LinkedList<SolrDocumentList> listOfDocument = new LinkedList<>();
-        for (QuerySolr q : queries) {
-            query.setQuery(q.getQueryNWordsText(NUMBER_OF_WORDS_SELECTED_TO_QUERIES));
+        for (Document q : queries) {
+            SolrQuery query = new SolrQuery(q.getQueryNWordsText(NUMBER_OF_WORDS_SELECTED_TO_QUERIES));
             QueryResponse rsp = client.query(COLLECTION_SOLR_NAME_DEFAULT, query);
 
             SolrDocumentList docs = rsp.getResults();
@@ -147,16 +143,16 @@ public class miClienteSoljr {
         }
     }
 
-    public static void generateTrecEval(SolrClient client, List<QuerySolr> queries) throws SolrServerException, Exception {
+    public static void generateTrecEval(SolrClient client, List<Document> queries) throws SolrServerException, Exception {
         List<SolrDocumentList> docs = new ArrayList<>();
-        
+
         SolrQuery query = configureQueryTrecEval();
-       
+
         for (int i = 0; i < queries.size(); i++) {
-            QuerySolr example = queries.get(i);
+            Document example = queries.get(i);
             query.setQuery(example
                     .getQueryNWordsText(-1));
-                            
+
             QueryResponse rsp = client.query(COLLECTION_SOLR_NAME_DEFAULT, query);
             docs.add(rsp.getResults());
         }
