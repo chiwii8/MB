@@ -143,7 +143,7 @@ public class Document {
     public String getQueryAllTextWords() {
         StringBuilder result = new StringBuilder("text_book:(").append(getformatString(text));
         if (title != null) {
-            result.append(" OR text_book:").append(getformatString(title));
+            result.append(" OR ").append(getformatString(title));
         }
 
         result.append(") ");
@@ -158,9 +158,9 @@ public class Document {
     public String getQuery() {
         StringBuilder query = new StringBuilder();
 
-        //String text_aux = getformatString(text);
-        //query.append("text_book:").append(text_aux).append("\n");
-        query.append(getQueryAllTextWords());
+        if (text != null) {
+            query.append(getQueryAllTextWords());
+        }
 
         if (title != null) {
             String title_aux = getformatString(title);

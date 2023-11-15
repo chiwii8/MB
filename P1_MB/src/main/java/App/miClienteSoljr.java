@@ -29,7 +29,7 @@ public class miClienteSoljr {
 
     //public static final String pathCorpus = "..\\CISI.ALL";
     //public static final String pathQuery = "..\\CISI.QRY";
-    private static final String COLLECTION_SOLR_NAME_DEFAULT = "prueba";
+    private static final String COLLECTION_SOLR_NAME_DEFAULT = "corpus";
     private static final int NUMBER_OF_WORDS_SELECTED_TO_QUERIES = 5;
 
     public static void main(String[] args) throws SolrServerException, IOException {
