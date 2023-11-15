@@ -4,8 +4,12 @@
  */
 package Modelos;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.solr.client.solrj.beans.Field;
 
 /**
@@ -125,16 +129,25 @@ public class Document {
 
         if (nWords > 0 && aux.length > nWords) {
             for (int i = 0; i < nWords; i++) {
-                    result.append(aux[i]).append(" ");
+                result.append(aux[i]).append(" ");
             }
-           
+
         } else {
             result.append(text);
         }
-        
-        //System.out.println(result.toString());
 
+        //System.out.println(result.toString());
         return "text_book:".concat(getformatString(result.toString()));
+    }
+
+    public String getQueryAllTextWords() {
+        StringBuilder result = new StringBuilder("text_book:(").append(getformatString(text));
+        if (title != null) {
+            result.append(" OR text_book:").append(getformatString(title));
+        }
+
+        result.append(") ");
+        return result.toString();
     }
 
     /**
@@ -145,18 +158,18 @@ public class Document {
     public String getQuery() {
         StringBuilder query = new StringBuilder();
 
+        //String text_aux = getformatString(text);
+        //query.append("text_book:").append(text_aux).append("\n");
+        query.append(getQueryAllTextWords());
+
         if (title != null) {
             String title_aux = getformatString(title);
-            query.append("title:(").append(title_aux).append(")\n");
+            query.append("title:").append(title_aux).append("\n");
         }
-        if (!authors.isEmpty()) {                                                    ///TODO Poner que los autores  estén cualquiera de los mencionados
-            String author_aux = authors.toString().replaceAll("[\\[\\]]", "");      ///Mirar los resultados obtenidos son mejores
+        /*if (!authors.isEmpty()) {                                                   
+            String author_aux = authors.toString().replaceAll("[\\[\\]]", "");      
             query.append("authors: ").append(author_aux).append("\n");
-        }
-        if (text != null) {
-            String text_aux = getformatString(text);
-            query.append("text_book:").append(text_aux).append("\n");
-        }
+        }*/
 
         //System.out.println(query.toString());
         return query.toString();
@@ -171,13 +184,16 @@ public class Document {
      * @return string formateado
      */
     private String getformatString(String stringFormat) {
-        /*String result = stringFormat.replaceAll(REGEX_SPECIAL_CHARACTERS, "")
-                .stripTrailing()
-                .replace(" ", "+");
-         */
-        return stringFormat.replaceAll(REGEX_SPECIAL_CHARACTERS, "")
-                .stripTrailing()
-                .replace(" ", "+");
+
+        try {
+            String formatted = URLEncoder.encode(stringFormat, "UTF-8");
+            return formatted;
+        } catch (UnsupportedEncodingException ex) {
+            return stringFormat.replaceAll(REGEX_SPECIAL_CHARACTERS, "")
+                    .strip()
+                    .replaceAll("\\s+", "+");
+        }
+
     }
 
     @Override

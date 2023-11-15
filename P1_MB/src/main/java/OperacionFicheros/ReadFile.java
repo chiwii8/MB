@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Esta clase se encarga de la lectura de ficheros
  * @author alejandro
  */
 public class ReadFile {
@@ -22,12 +22,10 @@ public class ReadFile {
     private final String titleRegex = "^\\.T\\s*$";
     private final String authorRegex = "^\\.A\\s*$";
     private final String textRegex = "^\\.W\\s*$";
-    private final String dataRegex = "^\\.X\\s*$";
     private final String boleRegex = "^\\.B\\s*$";
-    private final String typeinfoRegex = "^\\.K\\s*$";
-    private final String valueRegex = "^\\.C\\s*$";
     private final String markRegex = "^\\.\\w?\\s*\\d*\\s*$";
-    private final String specialCharacterRegex = "[+\\-\\&|\\(\\)\"\'\\~\\*\\?\\:]";
+    private final String noRelevantRegex="^\\.[^ITAWB]?\\s*\\d*\\s*$";
+    private final String relevantRegex ="^\\.[ITAWB]?\\s*\\d*\\s*$";
 
     /**
      * Lee los ficheros del corpus y las consultas
@@ -89,24 +87,8 @@ public class ReadFile {
                     newDocument.setText(text.toString().strip());
                 }
 
-                if (textLine!= null &&textLine.matches(typeinfoRegex)) {
-                    StringBuilder info = new StringBuilder("");
-                    while ((textLine = bf.readLine()) != null && !textLine.matches(markRegex)) {
-                        info.append(textLine).append(" ");
-                    }
-                    newDocument.setTypeInformation(info.toString().strip());
-                }
-
-                if (textLine!= null && textLine.matches(valueRegex)) {
-                    StringBuilder value = new StringBuilder("");
-                    while ((textLine = bf.readLine()) != null && !textLine.matches(markRegex)) {
-                        value.append(textLine).append(" ");
-                    }
-                    newDocument.setValue(value.toString().strip());
-                }
-
-                if (textLine!= null && textLine.matches(dataRegex)) {
-                    while ((textLine = bf.readLine()) != null && !textLine.matches(markRegex)) {
+                if (textLine!= null && textLine.matches(noRelevantRegex)) {
+                    while ((textLine = bf.readLine()) != null && !textLine.matches(relevantRegex)) {
                     }
                 }
 

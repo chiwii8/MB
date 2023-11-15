@@ -7,19 +7,16 @@ package App;
 import Modelos.Document;
 import OperacionFicheros.ReadFile;
 import OperacionFicheros.WriteFile;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
-
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.Http2SolrClient;
-
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -30,28 +27,41 @@ import org.apache.solr.common.SolrDocumentList;
  */
 public class miClienteSoljr {
 
-    public static String pathCorpus = "..\\CISI.ALL";
-    public static String pathQuery = "..\\CISI.QRY";
-    private static final String COLLECTION_SOLR_NAME_DEFAULT = "corpus";
+    //public static final String pathCorpus = "..\\CISI.ALL";
+    //public static final String pathQuery = "..\\CISI.QRY";
+    private static final String COLLECTION_SOLR_NAME_DEFAULT = "prueba";
     private static final int NUMBER_OF_WORDS_SELECTED_TO_QUERIES = 5;
 
     public static void main(String[] args) throws SolrServerException, IOException {
         SolrClient client = new Http2SolrClient.Builder("http://localhost:8983/solr").build();
         //Nueva forma de indexación de los documentos
+        Scanner input = new Scanner(System.in);
         List<Document> listofDocument;
         List<Document> listOfQueries = null;
+        String pathCorpus;
+        String pathQuery;
         ReadFile r = new ReadFile();
+
         int opt;
         try {
             do {
                 opt = Menu();
                 switch (opt) {
                     case 1 -> {                                             ///Carga los valores en el corpus
+                        System.out.print("Introduce la dirección del corpus:");
+                        pathCorpus = input.nextLine();
+
                         listofDocument = r.readDocuments(pathCorpus);
+
+                        deleteCorpus(client);   ///Elimina el corpus actual
+
                         client.addBeans(COLLECTION_SOLR_NAME_DEFAULT, listofDocument);
                         client.commit(COLLECTION_SOLR_NAME_DEFAULT);
                     }
                     case 2 -> {                                             ///Cargar consultas
+                        System.out.print("Introduce la dirección del documento de las consultas: ");
+                        pathQuery = input.nextLine();
+
                         listOfQueries = r.readDocuments(pathQuery);
                         System.out.println("Se han leido las consultas");
                     }
@@ -151,11 +161,22 @@ public class miClienteSoljr {
         for (int i = 0; i < queries.size(); i++) {
             Document example = queries.get(i);
             query.setQuery(example
-                    .getQueryNWordsText(-1));
+                    .getQueryAllTextWords());
 
             QueryResponse rsp = client.query(COLLECTION_SOLR_NAME_DEFAULT, query);
             docs.add(rsp.getResults());
         }
         WriteFile.generateTREC_EVAL(docs);
+    }
+
+    public static void deleteCorpus(SolrClient client) {
+        try {
+            client.deleteByQuery("prueba", "*");
+            client.commit(COLLECTION_SOLR_NAME_DEFAULT);
+        } catch (SolrServerException | IOException ex) {
+            System.out.println("Se ha producido un error al borrar la colección");
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 }
