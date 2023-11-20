@@ -188,12 +188,12 @@ public class Document {
         try {
             String formatted = URLEncoder.encode(stringFormat, "UTF-8");
             return formatted;
+            
         } catch (UnsupportedEncodingException ex) {
             return stringFormat.replaceAll(REGEX_SPECIAL_CHARACTERS, "")
                     .strip()
                     .replaceAll("\\s+", "+");
         }
-
     }
 
     @Override

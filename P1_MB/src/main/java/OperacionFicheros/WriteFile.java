@@ -39,7 +39,7 @@ public class WriteFile {
             for (int i = 0; i < documentResults.size(); i++) {
                 SolrDocumentList listOfDocument = documentResults.get(i);
                 for (int j = 0; j < listOfDocument.size(); j++) {
-                    FormattedDocument = formatSolrDocumentToTrecEval(listOfDocument.get(j), i + 1, j);
+                    FormattedDocument = formatSolrDocumentToTrecEval(listOfDocument.get(j), i + 1, j + 1);
                     writer.write(FormattedDocument);
                     writer.newLine();
                 }

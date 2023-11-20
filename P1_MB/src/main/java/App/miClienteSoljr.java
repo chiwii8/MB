@@ -16,7 +16,7 @@ import java.util.Scanner;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.Http2SolrClient;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -29,11 +29,12 @@ public class miClienteSoljr {
 
     //public static final String pathCorpus = "..\\CISI.ALL";
     //public static final String pathQuery = "..\\CISI.QRY";
-    private static final String COLLECTION_SOLR_NAME_DEFAULT = "corpus";
+    private static String COLLECTION_SOLR_NAME = null;
     private static final int NUMBER_OF_WORDS_SELECTED_TO_QUERIES = 5;
 
     public static void main(String[] args) throws SolrServerException, IOException {
-        SolrClient client = new Http2SolrClient.Builder("http://localhost:8983/solr").build();
+        SolrClient client = new HttpSolrClient.Builder("http://localhost:8983/solr").build();
+
         //Nueva forma de indexación de los documentos
         Scanner input = new Scanner(System.in);
         List<Document> listofDocument;
@@ -43,11 +44,14 @@ public class miClienteSoljr {
         ReadFile r = new ReadFile();
 
         int opt;
-        try {
-            do {
-                opt = Menu();
+        do {
+            opt = Menu();
+            try {
                 switch (opt) {
                     case 1 -> {                                             ///Carga los valores en el corpus
+                        System.out.print("Introduce el nombre de la coleccion:");
+                        COLLECTION_SOLR_NAME = input.nextLine();
+
                         System.out.print("Introduce la dirección del corpus:");
                         pathCorpus = input.nextLine();
 
@@ -55,10 +59,10 @@ public class miClienteSoljr {
 
                         deleteCorpus(client);   ///Elimina el corpus actual
 
-                        client.addBeans(COLLECTION_SOLR_NAME_DEFAULT, listofDocument);
-                        client.commit(COLLECTION_SOLR_NAME_DEFAULT);
+                        client.addBeans(COLLECTION_SOLR_NAME, listofDocument);
+                        client.commit(COLLECTION_SOLR_NAME);
                     }
-                    case 2 -> {                                             ///Cargar consultas
+                    case 2 -> {///Cargar consultas
                         System.out.print("Introduce la dirección del documento de las consultas: ");
                         pathQuery = input.nextLine();
 
@@ -67,6 +71,10 @@ public class miClienteSoljr {
                     }
                     case 3 -> {                                             ///Lanzar todas las consultas
                         if (listOfQueries != null) {
+                            if (COLLECTION_SOLR_NAME == null) {
+                                System.out.print("Introduce el nombre de la coleccion:");
+                                COLLECTION_SOLR_NAME = input.nextLine();
+                            }
                             System.out.println("Se han lanzado las consultas");
                             doQuery(client, listOfQueries);
                         } else {
@@ -76,6 +84,10 @@ public class miClienteSoljr {
                     }
                     case 4 -> {                                          ///Generar Fichero TREC_EVAL
                         if (listOfQueries != null) {
+                            if (COLLECTION_SOLR_NAME == null) {
+                                System.out.print("Introduce el nombre de la coleccion:");
+                                COLLECTION_SOLR_NAME = input.nextLine();
+                            }
                             generateTrecEval(client, listOfQueries);
                         } else {
                             System.out.println("Es necesario cargar las queries");
@@ -88,43 +100,50 @@ public class miClienteSoljr {
                         System.out.println("Opción no válida");
                 }
 
-            } while (opt != 0);
+            } catch (FileNotFoundException e) {
+                System.out.println(e.getMessage());
+            } catch (SolrServerException e) {
+                System.out.println("Error con el servidor de solr");
+                client = null;
+            } catch (IOException e) {
+                System.out.println("Error Con el cliente de solr");
+                System.out.println(e.getMessage());
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
 
-        } catch (FileNotFoundException e) {
-            System.out.println(e.getMessage());
-        } catch (SolrServerException e) {
-            System.out.println("Error con el servidor de solr");
-        } catch (IOException e) {
-            System.out.println("Error Con el cliente de solr");
-            System.out.println(e.getMessage());
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        } finally {
-            client.close();
-        }
+            if (client == null) {
+                System.exit(-1);
+            }
+        } while (opt != 0);
 
     }
 
     public static int Menu() {
         int option;
-        Scanner in = new Scanner(System.in);
-        System.out.println("\t\t--- Menu ---");
-        System.out.println("1. Cargar Corpus");
-        System.out.println("2. Cargar Consultas");
-        System.out.println("3. Lanzar Consulta");
-        System.out.println("4. Generar fichero TREC-EVAL");
-        System.out.println("0. Salir");
-        System.out.println("---------------------");
-        System.out.print("Selecciona una opcion: ");
-        option = in.nextInt();
-
-        while (option < 0 || option > 4) {
-            System.out.println("Opcion no válida");
-            System.out.print("Selecciona otra opcion: ");
+        try {
+            Scanner in = new Scanner(System.in);
+            System.out.println("\t\t--- Menu ---");
+            System.out.println("1. Cargar Corpus");
+            System.out.println("2. Cargar Consultas");
+            System.out.println("3. Lanzar Consulta");
+            System.out.println("4. Generar fichero TREC-EVAL");
+            System.out.println("0. Salir");
+            System.out.println("---------------------");
+            System.out.print("Selecciona una opcion: ");
             option = in.nextInt();
+
+            while (option < 0 || option > 4) {
+                System.out.println("Opcion no válida");
+                System.out.print("Selecciona otra opcion: ");
+                option = in.nextInt();
+            }
+
+            return option;
+        } catch (Exception ex) {
+            return -1;
         }
 
-        return option;
     }
 
     public static SolrQuery configureQueryTrecEval() {
@@ -138,7 +157,7 @@ public class miClienteSoljr {
         LinkedList<SolrDocumentList> listOfDocument = new LinkedList<>();
         for (Document q : queries) {
             SolrQuery query = new SolrQuery(q.getQueryNWordsText(NUMBER_OF_WORDS_SELECTED_TO_QUERIES));
-            QueryResponse rsp = client.query(COLLECTION_SOLR_NAME_DEFAULT, query);
+            QueryResponse rsp = client.query(COLLECTION_SOLR_NAME, query);
 
             SolrDocumentList docs = rsp.getResults();
             listOfDocument.add(docs);
@@ -154,16 +173,16 @@ public class miClienteSoljr {
     }
 
     public static void generateTrecEval(SolrClient client, List<Document> queries) throws SolrServerException, Exception {
-        List<SolrDocumentList> docs = new ArrayList<>();
+        List<SolrDocumentList> docs = new LinkedList<>();
 
         SolrQuery query = configureQueryTrecEval();
 
         for (int i = 0; i < queries.size(); i++) {
             Document example = queries.get(i);
             query.setQuery(example
-                    .getQueryAllTextWords());
+                    .getQuery());
 
-            QueryResponse rsp = client.query(COLLECTION_SOLR_NAME_DEFAULT, query);
+            QueryResponse rsp = client.query(COLLECTION_SOLR_NAME, query);
             docs.add(rsp.getResults());
         }
         WriteFile.generateTREC_EVAL(docs);
@@ -172,7 +191,7 @@ public class miClienteSoljr {
     public static void deleteCorpus(SolrClient client) {
         try {
             client.deleteByQuery("prueba", "*");
-            client.commit(COLLECTION_SOLR_NAME_DEFAULT);
+            client.commit(COLLECTION_SOLR_NAME);
         } catch (SolrServerException | IOException ex) {
             System.out.println("Se ha producido un error al borrar la colección");
         } catch (Exception ex) {

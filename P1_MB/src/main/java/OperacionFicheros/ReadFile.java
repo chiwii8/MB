@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class ReadFile {
      * @throws java.io.IOException
      * @throws java.io.FileNotFoundException
      */
-    public List<Document> readDocuments(String path) throws Exception {
+    public List<Document> readDocuments(String path) throws FileNotFoundException, IOException {
         List<Document> documents = new ArrayList<>();
 
         BufferedReader bf = openDocument(path);
@@ -94,7 +95,7 @@ public class ReadFile {
 
             } while (textLine != null && !textLine.matches(idRegex));
 
-            //System.out.println(newDocument);
+            System.out.println(newDocument);
             documents.add(newDocument);
         }
         bf.close();
