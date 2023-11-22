@@ -49,9 +49,10 @@ public class miClienteSoljr {
             try {
                 switch (opt) {
                     case 1 -> {                                             ///Carga los valores en el corpus
-                        System.out.print("Introduce el nombre de la coleccion:");
-                        COLLECTION_SOLR_NAME = input.nextLine();
-
+                        if (COLLECTION_SOLR_NAME == null) {
+                            System.out.print("Introduce el nombre de la coleccion:");
+                            COLLECTION_SOLR_NAME = input.nextLine();
+                        }
                         System.out.print("Introduce la dirección del corpus:");
                         pathCorpus = input.nextLine();
 
@@ -75,6 +76,7 @@ public class miClienteSoljr {
                                 System.out.print("Introduce el nombre de la coleccion:");
                                 COLLECTION_SOLR_NAME = input.nextLine();
                             }
+                            
                             System.out.println("Se han lanzado las consultas");
                             doQuery(client, listOfQueries);
                         } else {

@@ -95,7 +95,7 @@ public class ReadFile {
 
             } while (textLine != null && !textLine.matches(idRegex));
 
-            System.out.println(newDocument);
+            //System.out.println(newDocument);
             documents.add(newDocument);
         }
         bf.close();
