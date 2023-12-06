@@ -9,7 +9,6 @@ import OperacionFicheros.ReadFile;
 import OperacionFicheros.WriteFile;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
@@ -17,6 +16,7 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -33,7 +33,7 @@ public class miClienteSoljr {
     private static final int NUMBER_OF_WORDS_SELECTED_TO_QUERIES = 5;
 
     public static void main(String[] args) throws SolrServerException, IOException {
-        SolrClient client = new HttpSolrClient.Builder("http://localhost:8983/solr").build();
+        SolrClient client = new HttpSolrClient.Builder("http://localhost:8983/solr").withResponseParser(new XMLResponseParser()).build();
 
         //Nueva forma de indexación de los documentos
         Scanner input = new Scanner(System.in);
@@ -49,10 +49,7 @@ public class miClienteSoljr {
             try {
                 switch (opt) {
                     case 1 -> {                                             ///Carga los valores en el corpus
-                        if (COLLECTION_SOLR_NAME == null) {
-                            System.out.print("Introduce el nombre de la coleccion:");
-                            COLLECTION_SOLR_NAME = input.nextLine();
-                        }
+                        if(COLLECTION_SOLR_NAME!=null){
                         System.out.print("Introduce la dirección del corpus:");
                         pathCorpus = input.nextLine();
 
@@ -62,39 +59,45 @@ public class miClienteSoljr {
 
                         client.addBeans(COLLECTION_SOLR_NAME, listofDocument);
                         client.commit(COLLECTION_SOLR_NAME);
+                        }else{
+                            System.out.println("Se requiere cargar una colección");
+                        }
                     }
-                    case 2 -> {///Cargar consultas
+                    case 2 -> {
+                        System.out.print("Introduce el nombre de la coleccion:");
+                        COLLECTION_SOLR_NAME = input.nextLine();
+                    }
+                    case 3 -> {///Cargar consultas
                         System.out.print("Introduce la dirección del documento de las consultas: ");
                         pathQuery = input.nextLine();
 
                         listOfQueries = r.readDocuments(pathQuery);
                         System.out.println("Se han leido las consultas");
                     }
-                    case 3 -> {                                             ///Lanzar todas las consultas
-                        if (listOfQueries != null) {
-                            if (COLLECTION_SOLR_NAME == null) {
-                                System.out.print("Introduce el nombre de la coleccion:");
-                                COLLECTION_SOLR_NAME = input.nextLine();
-                            }
-                            
+
+                    case 4 -> {                                             ///Lanzar todas las consultas
+                        if (listOfQueries != null && COLLECTION_SOLR_NAME != null) {
+
                             System.out.println("Se han lanzado las consultas");
                             doQuery(client, listOfQueries);
                         } else {
-                            System.out.println("La lista de consultas está vacía");
+                            System.out.println("La lista de consultas está vacía o no se ha inicializado el nombre de la coleccion");
                         }
 
                     }
-                    case 4 -> {                                          ///Generar Fichero TREC_EVAL
+
+                    case 5 -> {                                          ///Generar Fichero TREC_EVAL
                         if (listOfQueries != null) {
-                            if (COLLECTION_SOLR_NAME == null) {
-                                System.out.print("Introduce el nombre de la coleccion:");
-                                COLLECTION_SOLR_NAME = input.nextLine();
-                            }
+                            if(COLLECTION_SOLR_NAME != null){
                             generateTrecEval(client, listOfQueries);
+                            }else{
+                                System.out.println("No se ha inicializado la colección");
+                            }
                         } else {
                             System.out.println("Es necesario cargar las queries");
                         }
                     }
+
                     case 0 -> {                                             ///Fin programa
                         System.out.println("Fin del programa");
                     }
@@ -127,15 +130,16 @@ public class miClienteSoljr {
             Scanner in = new Scanner(System.in);
             System.out.println("\t\t--- Menu ---");
             System.out.println("1. Cargar Corpus");
-            System.out.println("2. Cargar Consultas");
-            System.out.println("3. Lanzar Consulta");
-            System.out.println("4. Generar fichero TREC-EVAL");
+            System.out.println("2. Seleccionar Coleccion");
+            System.out.println("3. Cargar Consultas");
+            System.out.println("4. Lanzar Consulta");
+            System.out.println("5. Generar fichero TREC-EVAL");
             System.out.println("0. Salir");
             System.out.println("---------------------");
             System.out.print("Selecciona una opcion: ");
             option = in.nextInt();
 
-            while (option < 0 || option > 4) {
+            while (option < 0 || option > 5) {
                 System.out.println("Opcion no válida");
                 System.out.print("Selecciona otra opcion: ");
                 option = in.nextInt();
@@ -158,7 +162,7 @@ public class miClienteSoljr {
 
         LinkedList<SolrDocumentList> listOfDocument = new LinkedList<>();
         for (Document q : queries) {
-            SolrQuery query = new SolrQuery(q.getQueryNWordsText(NUMBER_OF_WORDS_SELECTED_TO_QUERIES));
+            SolrQuery query = new SolrQuery(q.getQuery());
             QueryResponse rsp = client.query(COLLECTION_SOLR_NAME, query);
 
             SolrDocumentList docs = rsp.getResults();
@@ -190,6 +194,7 @@ public class miClienteSoljr {
         WriteFile.generateTREC_EVAL(docs);
     }
 
+    
     public static void deleteCorpus(SolrClient client) {
         try {
             client.deleteByQuery("prueba", "*");
