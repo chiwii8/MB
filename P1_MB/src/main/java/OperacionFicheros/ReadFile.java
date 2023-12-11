@@ -90,6 +90,7 @@ public class ReadFile {
                 if (textLine != null && textLine.matches(authorRegex)) {
                     while ((textLine = bf.readLine()) != null && !textLine.matches(markRegex)) {
                         String parsePerson = parseXMLtoString(textLine);
+                        newDocument.setnewAuthor(parsePerson);
                         newDocument.setnewPerson(parsePerson);
                     }
                 }
@@ -200,6 +201,7 @@ public class ReadFile {
 
         ///No se requiere parsear las personas,o mejor dicho los autores
         ///Se parsean en el momento que son leídos
+        newDocument.setAuthors(parseDocument.getAuthors());
         newDocument.addAllPersons(parseDocument.getPersons());
 
         ///Cargamos los datos en el nuevo documento

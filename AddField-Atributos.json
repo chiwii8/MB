@@ -10,7 +10,7 @@
     "required": "true"
   },
   "add-field": {
-    "name": "authors",
+    "name": "author",
     "type": "text_en",
     "required": "true",
     "multiValued": "true"
@@ -19,5 +19,29 @@
     "name": "text_book",
     "type": "text_en",
     "required": "true"
+  },
+  "add-field": {
+    "name": "Person",
+    "type": "text_en",
+    "required": "false",
+    "multiValued": "true"
+  },
+  "add-field": {
+    "name": "Organization",
+    "type": "text_en",
+    "required": "false",
+    "multiValued": "true"
+  },
+  "add-field": {
+    "name": "Location",
+    "type": "text_en",
+    "required": "false",
+    "multiValued": "true"
+  },
+  "add-field": {
+    "name": "Date",
+    "type": "text_en",
+    "required": "false",
+    "multiValued": "true"
   }
 }

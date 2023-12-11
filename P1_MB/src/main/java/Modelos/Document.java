@@ -25,20 +25,21 @@ public class Document {
     public final static String TEXT_FIELD = "text_book";
     public final static String INDEX_FIELD = "index";
     public final static String TITLE_FIELD = "title";
+    public final static String AUTHOR_FIELD = "author";
 
     public final static String PERSON_FIELD = "Person";
     public final static String ORGANITATION_FIELD = "Organization";
     public final static String LOCATION_FIELD = "Location";
     public final static String DATE_FIELD = "Date";
-    
-    private final static String VARIABLE_TAG_NAME[] = {TEXT_FIELD,TITLE_FIELD,PERSON_FIELD,ORGANITATION_FIELD,LOCATION_FIELD,DATE_FIELD};
+
+    private final static String VARIABLE_TAG_NAME[] = {TEXT_FIELD, TITLE_FIELD,AUTHOR_FIELD,PERSON_FIELD, ORGANITATION_FIELD, LOCATION_FIELD, DATE_FIELD};
     private final static String DATA_FIELD_ARRAY[] = {PERSON_FIELD, ORGANITATION_FIELD, LOCATION_FIELD, DATE_FIELD};
     ///Variables
     private String index;
     private String title;
     private String boletin;
     private String text;
-    ///private List<String> authors; incluida en persons
+    private Set<String> authors;
 
     ///Atributos requeridos por solr después de parsear el Corpus y el CISI.QRY
     private Set<String> persons;
@@ -51,6 +52,7 @@ public class Document {
         title = null;
         boletin = null;
         text = null;
+        authors = new HashSet<>();
 
         persons = new HashSet<>();
         organitations = new HashSet<>();
@@ -59,9 +61,9 @@ public class Document {
 
     }
 
-    public Document(String index, HashSet<String> Persons, String Text) {
+    public Document(String index, HashSet<String> authors, String Text) {
         this.index = index;
-        this.persons = Persons;
+        this.authors = authors;
         this.text = Text;
     }
 
@@ -98,6 +100,19 @@ public class Document {
     @Field(TEXT_FIELD)
     public void setText(String Text) {
         this.text = Text;
+    }
+
+    public Set<String> getAuthors() {
+        return authors;
+    }
+
+    @Field(AUTHOR_FIELD)
+    public void setAuthors(Set<String> authors) {
+        this.authors = authors;
+    }
+
+    public void setnewAuthor(String author) {
+        authors.add(author);
     }
 
     public String getBoletin() {
@@ -241,6 +256,17 @@ public class Document {
             query.append(Document.TITLE_FIELD.concat(":(")).append(title_aux).append(")\n");
         }
 
+        if (!authors.isEmpty()) {
+            Iterator ite = authors.iterator();
+            String aux_author = "\"".concat((String) ite.next()).concat("\"");
+            query.append(Document.AUTHOR_FIELD.concat(":(")).append(aux_author);
+            while (ite.hasNext()) {
+                String aux = "\"".concat((String) ite.next()).concat("\"");
+                query.append(" AND ").append(aux);
+            }
+            query.append(")\n");
+        }
+
         if (!persons.isEmpty()) {
             Iterator ite = persons.iterator();
             String aux_person = "\"".concat((String) ite.next()).concat("\"");
@@ -274,8 +300,6 @@ public class Document {
             }
             query.append(")\n");
         }*/
-
-        
         if (!dates.isEmpty()) {
             Iterator ite = dates.iterator();
             String aux_date = "\"".concat((String) ite.next()).concat("\"");
@@ -286,8 +310,8 @@ public class Document {
             }
             query.append(")\n");
         }
-        
-        System.out.println(query.toString());
+
+        //System.out.println(query.toString());
         return query.toString();
     }
 
@@ -312,6 +336,24 @@ public class Document {
         }
     }
 
+    public String toStringHtml() {
+        StringBuilder str = new StringBuilder("<b>Index:</b> ").append(index).append("<br>");
+
+        if (title != null) {
+            str.append("<b>Title:</b> ").append(title).append("<br>");
+        }
+        if (!authors.isEmpty()) {
+            for (String author : authors) {
+                str.append("<b>author:</b> ").append(author).append("<br>");
+            }
+        }
+
+        str.append("<b>Text:</b> ").append(text).append("<br><br>");
+
+        return str.toString();
+
+    }
+    
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder("Index: ").append(index);
