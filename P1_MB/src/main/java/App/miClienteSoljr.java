@@ -33,7 +33,7 @@ public class miClienteSoljr {
     private static final int NUMBER_OF_WORDS_SELECTED_TO_QUERIES = 5;
 
     public static void main(String[] args) throws SolrServerException, IOException {
-        SolrClient client = new HttpSolrClient.Builder("http://localhost:8983/solr").withResponseParser(new XMLResponseParser()).build();
+        SolrClient client = new HttpSolrClient.Builder("http://localhost:8983/solr").build();
 
         //Nueva forma de indexación de los documentos
         Scanner input = new Scanner(System.in);
