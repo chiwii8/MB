@@ -306,7 +306,7 @@ public class Document {
             query.append(Document.DATE_FIELD.concat(":(")).append(aux_date);
             while (ite.hasNext()) {
                 String aux = "\"".concat((String) ite.next()).concat("\"");
-                query.append(" OR ").append(aux);
+                query.append(" AND ").append(aux);
             }
             query.append(")\n");
         }

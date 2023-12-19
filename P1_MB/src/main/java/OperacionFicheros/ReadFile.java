@@ -150,7 +150,8 @@ public class ReadFile {
 
     /**
      * Nos permite parsear el documento semi-XML a un bean, realizando una
-     * extracción de las etiquetas XML. La información recopilada está dirigida por las etiquetas del documento
+     * extracción de las etiquetas XML. La información recopilada está dirigida
+     * por las etiquetas del documento
      *
      * @param parseDocument documento a parsear
      * @return devuelve un nuevo documento con sus atributos parseados
@@ -187,7 +188,7 @@ public class ReadFile {
                 ///Conjunto recolectado y conjunto actual si no vacío
                 Set<String> set_aux = Aux_title.get(key);
                 Set<String> set_actual = docData.get(key);
-                if (set_actual!=null && !set_actual.isEmpty()) {
+                if (set_actual != null && !set_actual.isEmpty()) {
                     set_actual.addAll(set_aux);
                     docData.put(key, set_actual);
                 } else {
@@ -197,6 +198,29 @@ public class ReadFile {
             }
             String parsedTitle = parseXMLtoString(title);
             newDocument.setTitle(parsedTitle);
+        }
+
+        ///TODO revisar el resultado
+        ///Parseamos el boletín si existe
+        String boletin = parseDocument.getBoletin();
+        if (boletin != null) {
+            Map<String, Set<String>> Aux_boletin = dataExtractFromXML(boletin);
+            for (String key : keyData) {
+                ///Conjunto recolectado y conjunto actual si no vacío
+                Set<String> set_aux = Aux_boletin.get(key);
+                Set<String> set_actual = docData.get(key);
+                if (set_actual != null && !set_actual.isEmpty()) {
+                    set_actual.addAll(set_aux);
+                    docData.put(key, set_actual);
+                } else {
+                    docData.put(key, set_aux);
+                }
+                docData.put(key, set_aux);
+            }
+            ///No lo pasamos el boletin porque no lo indexamos
+            //String parsedBoletin = parseXMLtoString(boletin);
+            //newDocument.setBoletin(parsedBoletin);
+            
         }
 
         ///No se requiere parsear las personas,o mejor dicho los autores
